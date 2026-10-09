@@ -10,8 +10,6 @@ type Props = {
   rootNode: TreeNode;
   filter?: (node: TreeNode) => boolean;
   selectedNodeId?: string;
-  /** Modules currently open as tabs; marked in the tree. */
-  openNodeIds?: ReadonlySet<string>;
   onSelect: (nodeId: string) => void;
   isNodeDisabled?: (node: TreeNode) => boolean;
 };
@@ -57,12 +55,11 @@ function collectFolderIds(nodes: RenderNode[], acc: string[]): string[] {
 const GroupTree = ({
   group,
   selectedNodeId,
-  openNodeIds,
   onSelect,
   isNodeDisabled,
 }: {
   group: FileTreeGroup;
-} & Pick<Props, 'selectedNodeId' | 'openNodeIds' | 'onSelect' | 'isNodeDisabled'>) => {
+} & Pick<Props, 'selectedNodeId' | 'onSelect' | 'isNodeDisabled'>) => {
   const children = useMemo(() => toRenderNode(group.root), [group.root]);
 
   const collection = useMemo(
@@ -100,9 +97,6 @@ const GroupTree = ({
           <BitkitTreeView.Leaf
             label={node.label}
             icon={IconFileYml}
-            iconColor={openNodeIds?.has(node.id) ? 'icon/interactive' : undefined}
-            data-open={openNodeIds?.has(node.id) ? '' : undefined}
-            title={openNodeIds?.has(node.id) ? `${node.label} — open in a tab` : undefined}
             // Clicking the already-selected file doesn't change the selection, so onSelectionChange
             // never fires — handle that case here so selecting the active file still runs onSelect
             // (which closes the picker). Other files are handled by onSelectionChange (single fire).
@@ -118,7 +112,7 @@ const GroupTree = ({
   );
 };
 
-const FileTreeView = ({ rootNode, filter, selectedNodeId, openNodeIds, onSelect, isNodeDisabled }: Props) => {
+const FileTreeView = ({ rootNode, filter, selectedNodeId, onSelect, isNodeDisabled }: Props) => {
   const projectRepoLabel = PageProps.app()?.gitRepoSlug || PageProps.app()?.name || 'This repository';
 
   const groups = useMemo(
@@ -150,7 +144,6 @@ const FileTreeView = ({ rootNode, filter, selectedNodeId, openNodeIds, onSelect,
           <GroupTree
             group={group}
             selectedNodeId={selectedNodeId}
-            openNodeIds={openNodeIds}
             onSelect={onSelect}
             isNodeDisabled={isNodeDisabled}
           />
