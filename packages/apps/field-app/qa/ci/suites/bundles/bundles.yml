@@ -1,0 +1,18 @@
+step_bundles:
+  e2e_install_tooling:
+    summary: Maestro CLI and the results reporter
+    steps:
+      - script@1:
+          title: Install Maestro
+          inputs:
+            - content: curl -fsSL "https://get.maestro.mobile.dev" | bash
+  e2e_upload_results:
+    summary: JUnit to Test Reports, raw output to artifacts
+    steps:
+      - custom-test-results-export@1:
+          is_always_run: true
+          inputs:
+            - search_pattern: "*/qa-results/*.xml"
+            - test_name: E2E
+      - deploy-to-bitrise-io@2:
+          is_always_run: true

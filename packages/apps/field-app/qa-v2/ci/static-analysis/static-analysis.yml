@@ -1,0 +1,29 @@
+# Static checks for the qa-v2 test code itself.
+pipelines:
+  next_code_checking:
+    summary: Typecheck and lint the qa-v2 sources on every PR
+    triggers:
+      pull_request:
+        - target_branch: main
+          changed_files: packages/apps/field-app/qa-v2/**
+    workflows:
+      next_typecheck: {}
+      next_lint: {}
+
+workflows:
+  next_typecheck:
+    steps:
+      - bundle::next_setup: {}
+      - script@1:
+          title: tsc
+          execution_container: node
+          inputs:
+            - content: yarn --cwd $APP_ROOT/qa-v2 tsc --noEmit
+  next_lint:
+    steps:
+      - bundle::next_setup: {}
+      - script@1:
+          title: eslint
+          execution_container: node
+          inputs:
+            - content: yarn --cwd $APP_ROOT/qa-v2 lint

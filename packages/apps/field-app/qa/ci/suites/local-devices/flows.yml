@@ -1,0 +1,43 @@
+pipelines:
+  e2e_simulator_pr:
+    summary: Maestro flow tests on simulators for every PR touching field-app
+    triggers:
+      pull_request:
+        - target_branch: main
+          changed_files: packages/apps/field-app/**
+    workflows:
+      e2e_sim_get_commit_hash: {}
+      e2e_sim_build_ios_app:
+        depends_on: [e2e_sim_get_commit_hash]
+      e2e_sim_build_android_app:
+        depends_on: [e2e_sim_get_commit_hash]
+      e2e_sim_run_flow_tests_ios:
+        depends_on: [e2e_sim_build_ios_app]
+      e2e_sim_run_flow_tests_android:
+        depends_on: [e2e_sim_build_android_app]
+      e2e_sim_test_validation:
+        depends_on: [e2e_sim_run_flow_tests_ios, e2e_sim_run_flow_tests_android]
+
+  e2e_simulator_performance:
+    summary: Performance runs on several machines, compared against the baseline (nightly)
+    workflows:
+      e2e_sim_get_commit_hash: {}
+      e2e_sim_build_ios_app:
+        depends_on: [e2e_sim_get_commit_hash]
+      e2e_sim_run_performance_tests_m1:
+        depends_on: [e2e_sim_build_ios_app]
+      e2e_sim_run_performance_tests_m2:
+        depends_on: [e2e_sim_build_ios_app]
+      e2e_sim_analyse_multi_machine_results:
+        depends_on: [e2e_sim_run_performance_tests_m1, e2e_sim_run_performance_tests_m2]
+      e2e_sim_detect_new_regressions:
+        depends_on: [e2e_sim_analyse_multi_machine_results]
+
+  e2e_simulator_new_baseline:
+    summary: Record a fresh performance baseline (run manually after an accepted change)
+    workflows:
+      e2e_sim_get_commit_hash: {}
+      e2e_sim_build_ios_app:
+        depends_on: [e2e_sim_get_commit_hash]
+      e2e_sim_generate_performance_baseline:
+        depends_on: [e2e_sim_build_ios_app]

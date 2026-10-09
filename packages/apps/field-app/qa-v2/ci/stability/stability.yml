@@ -1,0 +1,23 @@
+# Re-runs new or changed flows several times to catch flaky tests before they land.
+pipelines:
+  next_flakiness_check:
+    summary: Run changed flows 10x and fail if any result differs
+    workflows:
+      next_sim_build_app: {}
+      next_flakiness_check:
+        depends_on: [next_sim_build_app]
+
+workflows:
+  next_flakiness_check:
+    envs:
+      - FLAKINESS_RUNS: "10"
+    steps:
+      - bundle::next_setup: {}
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: next_sim_build_app
+      - script@1:
+          title: Repeat changed flows
+          inputs:
+            - content: yarn --cwd $APP_ROOT detox test --repeat $FLAKINESS_RUNS --only-changed origin/main
+      - bundle::next_report: {}

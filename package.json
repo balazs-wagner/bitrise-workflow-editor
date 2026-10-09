@@ -33,6 +33,7 @@
     "start:dev:api": "DEV=true ./_scripts/run_api.sh 4000",
     "start:base": "concurrently \"npm:start:dev\" \"npm:start:dev:api\"",
     "start": "NODE_ENV=development MODE=CLI npm run start:base",
+    "start:demo": "BITRISE_CONFIG=./packages/apps/field-app/bitrise.yml BITRISE_SECRETS=./packages/apps/field-app/bitrise.secrets.yml npm start",
     "start:website": "NODE_ENV=development MODE=WEBSITE PUBLIC_URL_ROOT=\"${PUBLIC_URL_ROOT:-/workflow_editor}\" npm run start:base",
     "preview": "vite preview",
     "build-storybook": "storybook build -c .storybook",

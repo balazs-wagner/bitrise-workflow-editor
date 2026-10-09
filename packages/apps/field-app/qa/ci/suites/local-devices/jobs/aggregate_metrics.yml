@@ -1,0 +1,30 @@
+workflows:
+  e2e_sim_analyse_multi_machine_results:
+    summary: Merge per-machine results and normalise for hardware differences
+    steps:
+      - bundle::checkout: {}
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_run_performance_tests_.*
+      - script@1:
+          title: Analyse
+          execution_container: python
+          inputs:
+            - content: python packages/infra/perf/analyse.py --inputs "$BITRISE_PERF_RESULTS_*" --out perf-summary.json
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: perf-summary.json:PERF_SUMMARY
+
+  e2e_sim_detect_new_regressions:
+    summary: Compare against the stored baseline and open a ticket on a regression
+    steps:
+      - bundle::checkout: {}
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_analyse_multi_machine_results
+      - script@1:
+          title: Detect regressions
+          execution_container: python
+          inputs:
+            - content: python packages/infra/perf/regressions.py --summary "$BITRISE_PERF_SUMMARY" --baseline "$PERF_BASELINE_BUCKET/latest.json"
+      - bundle::notify_slack: {}

@@ -1,0 +1,12 @@
+workflows:
+  next_bs_run_tests:
+    summary: WebdriverIO suite on BrowserStack
+    steps:
+      - bundle::next_setup: {}
+      - bundle::next_acquire_device_lock: {}
+      - script@1:
+          title: Run on BrowserStack
+          inputs:
+            - content: yarn --cwd $APP_ROOT qa-v2:browserstack --app "$BROWSERSTACK_APP_URL"
+      - bundle::next_release_device_lock: {}
+      - bundle::next_report: {}

@@ -1,0 +1,15 @@
+step_bundles:
+  next_acquire_device_lock:
+    summary: Take a lock on a shared test account so parallel runs don't collide
+    steps:
+      - script@1:
+          title: Acquire lock
+          inputs:
+            - content: node packages/infra/e2e-lock/acquire.js --ttl 3600 --owner "$BITRISE_BUILD_SLUG"
+  next_release_device_lock:
+    steps:
+      - script@1:
+          title: Release lock
+          is_always_run: true
+          inputs:
+            - content: node packages/infra/e2e-lock/release.js --owner "$BITRISE_BUILD_SLUG"

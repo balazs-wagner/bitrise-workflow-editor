@@ -1,0 +1,45 @@
+workflows:
+  e2e_sim_run_flow_tests_ios:
+    summary: Maestro flows on an iPhone simulator
+    before_run:
+      - _e2e_setup
+    after_run:
+      - _e2e_teardown
+    steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_build_ios_app
+      - bundle::sim_boot_ios_simulator: {}
+      - bundle::sim_run_maestro:
+          inputs:
+            - platform: ios
+
+  e2e_sim_run_flow_tests_android:
+    summary: Maestro flows on an Android emulator
+    before_run:
+      - _e2e_setup
+    after_run:
+      - _e2e_teardown
+    meta:
+      bitrise.io:
+        stack: ubuntu-noble-24.04-bitrise-2025-android
+        machine_type_id: g2.linux.large
+    steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_build_android_app
+      - bundle::sim_boot_android_emulator: {}
+      - bundle::sim_run_maestro:
+          inputs:
+            - platform: android
+
+  e2e_sim_test_validation:
+    summary: Fail the pipeline if any flow failed on either platform
+    steps:
+      - script@1:
+          title: Validate
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                echo "All simulator flow tests passed for $E2E_COMMIT_HASH"

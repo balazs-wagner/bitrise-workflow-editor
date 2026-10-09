@@ -1,0 +1,11 @@
+workflows:
+  e2e_bs_analyse_results:
+    summary: Pull session logs and videos, summarise failures
+    steps:
+      - bundle::checkout: {}
+      - script@1:
+          title: Analyse BrowserStack sessions
+          execution_container: python
+          inputs:
+            - content: python packages/infra/browserstack/summarise.py --build "$BITRISE_BUILD_NUMBER"
+      - bundle::notify_slack: {}

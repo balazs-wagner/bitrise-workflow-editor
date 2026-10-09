@@ -1,0 +1,12 @@
+workflows:
+  e2e_bs_run_performance_tests:
+    summary: Cold start and scroll jank on real devices
+    before_run:
+      - _e2e_setup
+    after_run:
+      - _e2e_teardown
+    steps:
+      - script@1:
+          title: Run perf on BrowserStack
+          inputs:
+            - content: yarn --cwd $APP_ROOT e2e:browserstack:perf --app "$BROWSERSTACK_APP_URL"

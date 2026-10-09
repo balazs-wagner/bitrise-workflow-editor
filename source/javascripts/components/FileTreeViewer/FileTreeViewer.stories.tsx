@@ -1,7 +1,5 @@
-import { Box } from '@bitrise/bitkit';
-import { BitkitTabs } from '@bitrise/bitkit-v2';
+import { BitkitPageSidebar, rem } from '@bitrise/bitkit-v2';
 import { Meta, StoryObj } from '@storybook/react-vite';
-import { useRef, useState } from 'react';
 
 import { TreeNode } from '@/core/models/Tree';
 import { initializeModularConfig } from '@/core/stores/BitriseYmlStore';
@@ -77,26 +75,16 @@ export default {
   },
   decorators: [
     (Story) => (
-      <Box display="flex" justifyContent="flex-end" padding="24">
-        <Story />
-      </Box>
+      <BitkitPageSidebar minHeight="auto" width={rem(256)}>
+        <BitkitPageSidebar.Body>
+          <BitkitPageSidebar.Item>Workflows</BitkitPageSidebar.Item>
+          <Story />
+        </BitkitPageSidebar.Body>
+      </BitkitPageSidebar>
     ),
   ],
 } as Meta<typeof FileTreeViewer>;
 
 type Story = StoryObj<typeof FileTreeViewer>;
 
-const FileTreeViewerDemo = () => {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(true);
-  return (
-    <>
-      <BitkitTabs.AddButton ref={ref} label="Open module" onClick={() => setOpen((isOpen) => !isOpen)} />
-      <FileTreeViewer open={open} onOpenChange={setOpen} getAnchor={() => ref.current} />
-    </>
-  );
-};
-
-export const Default: Story = {
-  render: () => <FileTreeViewerDemo />,
-};
+export const Default: Story = {};

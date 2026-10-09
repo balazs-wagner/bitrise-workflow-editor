@@ -1,0 +1,21 @@
+step_bundles:
+  next_setup:
+    summary: Checkout and install, plus the qa-v2 workspace
+    steps:
+      - bundle::checkout: {}
+      - bundle::install_node_deps: {}
+      - yarn@0:
+          inputs:
+            - workdir: $APP_ROOT/qa-v2
+            - command: install --frozen-lockfile
+  next_report:
+    summary: Export JUnit results and notify
+    steps:
+      - custom-test-results-export@1:
+          is_always_run: true
+          inputs:
+            - search_pattern: "*/qa-v2/results/*.xml"
+            - test_name: qa-v2
+      - deploy-to-bitrise-io@2:
+          is_always_run: true
+      - bundle::notify_slack: {}

@@ -1,0 +1,29 @@
+workflows:
+  e2e_bs_build_app:
+    summary: Build iOS and Android binaries and upload them to BrowserStack
+    before_run:
+      - _e2e_setup
+    steps:
+      - xcode-archive@5:
+          inputs:
+            - project_path: $IOS_WORKSPACE
+            - scheme: $IOS_SCHEME
+            - distribution_method: development
+      - browserstack-upload@0:
+          inputs:
+            - upload_path: $BITRISE_IPA_PATH
+      - share-pipeline-variable@1:
+          inputs:
+            - variables: BROWSERSTACK_APP_URL
+
+  e2e_bs_configure:
+    summary: Pick the device matrix and test accounts for this run
+    steps:
+      - bundle::checkout: {}
+      - script@1:
+          title: Select devices
+          inputs:
+            - content: envman add --key BS_DEVICE_MATRIX --value "iPhone 15:17,iPhone 13:16,Pixel 8:14,Galaxy S23:13"
+      - share-pipeline-variable@1:
+          inputs:
+            - variables: BS_DEVICE_MATRIX

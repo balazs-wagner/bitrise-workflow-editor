@@ -1,0 +1,50 @@
+# Field App — React Native field app. Demo modular config for local WFE development.
+# Start it with `npm run start:demo`. Include paths are relative to the repo root.
+format_version: "13"
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+
+meta:
+  bitrise.io:
+    stack: osx-xcode-16.2.x
+    machine_type_id: g2.mac.medium
+
+include:
+  - path: packages/infra/ci-shared/defaults.yml
+  - path: packages/apps/field-app/qa/ci/suites/suites.yml
+  - path: packages/apps/field-app/qa-v2/ci/main.yml
+
+app:
+  envs:
+    - APP_NAME: field-app
+    - APP_ROOT: packages/apps/field-app
+    - IOS_WORKSPACE: packages/apps/field-app/ios/FieldApp.xcworkspace
+    - IOS_SCHEME: FieldApp
+    - ANDROID_ROOT: packages/apps/field-app/android
+    - MAESTRO_FLOWS_DIR: packages/apps/field-app/qa/flows
+    - PERF_BASELINE_BUCKET: s3://field-app-perf-baselines
+    - SLACK_CHANNEL: "#field-app-e2e"
+
+containers:
+  node:
+    type: execution
+    image: node:22
+  python:
+    type: execution
+    image: python:3.12-slim
+  redis:
+    type: service
+    image: redis:7
+    ports:
+      - 6379:6379
+
+workflows:
+  field_app_smoke:
+    summary: Quick check that the app installs and boots
+    steps:
+      - bundle::checkout: {}
+      - bundle::install_node_deps: {}
+      - script@1:
+          title: Smoke
+          inputs:
+            - content: yarn --cwd $APP_ROOT test:smoke

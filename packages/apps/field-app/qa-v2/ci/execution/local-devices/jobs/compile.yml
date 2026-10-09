@@ -1,0 +1,12 @@
+workflows:
+  next_sim_build_app:
+    summary: Simulator build with the qa-v2 test hooks compiled in
+    steps:
+      - bundle::next_setup: {}
+      - xcode-build-for-simulator@3:
+          inputs:
+            - project_path: $IOS_WORKSPACE
+            - scheme: FieldAppE2E
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: $BITRISE_APP_DIR_PATH:NEXT_IOS_APP

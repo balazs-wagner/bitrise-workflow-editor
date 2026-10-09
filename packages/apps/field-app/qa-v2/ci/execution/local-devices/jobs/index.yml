@@ -1,0 +1,4 @@
+include:
+  - path: packages/apps/field-app/qa-v2/ci/execution/local-devices/jobs/compile.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/local-devices/jobs/journeys.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/local-devices/bundles/bundles.yml

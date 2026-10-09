@@ -1,0 +1,16 @@
+workflows:
+  e2e_sim_generate_performance_baseline:
+    summary: Run the perf suite 10x and store the median as the new baseline
+    before_run:
+      - _e2e_setup
+    steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_build_ios_app
+      - bundle::sim_boot_ios_simulator: {}
+      - script@1:
+          title: Record baseline
+          inputs:
+            - content: |-
+                yarn --cwd $APP_ROOT e2e:perf --runs 10 --out baseline.json
+                aws s3 cp baseline.json "$PERF_BASELINE_BUCKET/$E2E_COMMIT_HASH.json"

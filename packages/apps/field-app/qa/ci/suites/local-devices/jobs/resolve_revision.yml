@@ -1,0 +1,12 @@
+workflows:
+  e2e_sim_get_commit_hash:
+    summary: Resolve the commit under test and share it with the rest of the pipeline
+    steps:
+      - bundle::checkout: {}
+      - script@1:
+          title: Resolve commit hash
+          inputs:
+            - content: envman add --key E2E_COMMIT_HASH --value "$(git rev-parse --short HEAD)"
+      - share-pipeline-variable@1:
+          inputs:
+            - variables: E2E_COMMIT_HASH

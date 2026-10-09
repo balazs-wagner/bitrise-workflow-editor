@@ -1,0 +1,23 @@
+pipelines:
+  e2e_browserstack_nightly:
+    summary: Full suite on real devices in BrowserStack
+    triggers:
+      push:
+        - branch: main
+    workflows:
+      e2e_bs_configure: {}
+      e2e_bs_build_app: {}
+      e2e_bs_run_tests:
+        depends_on: [e2e_bs_configure, e2e_bs_build_app]
+      e2e_bs_analyse_results:
+        depends_on: [e2e_bs_run_tests]
+
+  e2e_browserstack_performance:
+    summary: App launch and scroll performance on real devices
+    workflows:
+      e2e_bs_configure: {}
+      e2e_bs_build_app: {}
+      e2e_bs_run_performance_tests:
+        depends_on: [e2e_bs_configure, e2e_bs_build_app]
+      e2e_bs_analyse_results:
+        depends_on: [e2e_bs_run_performance_tests]

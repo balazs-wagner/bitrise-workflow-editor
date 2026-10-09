@@ -1,0 +1,29 @@
+step_bundles:
+  sim_boot_ios_simulator:
+    summary: Boot an iPhone simulator and install the app
+    steps:
+      - script@1:
+          title: Boot simulator
+          inputs:
+            - content: |-
+                xcrun simctl boot "iPhone 16" || true
+                xcrun simctl install booted "$BITRISE_E2E_IOS_APP"
+  sim_boot_android_emulator:
+    summary: Start an API 34 emulator and install the APK
+    steps:
+      - avd-manager@2:
+          inputs:
+            - api_level: "34"
+      - wait-for-android-emulator@1: {}
+      - script@1:
+          title: Install APK
+          inputs:
+            - content: adb install "$BITRISE_E2E_ANDROID_APK"
+  sim_run_maestro:
+    inputs:
+      - platform: ios
+    steps:
+      - script@1:
+          title: Run Maestro flows
+          inputs:
+            - content: maestro test --platform "$platform" --format junit --output e2e-results/$platform.xml $MAESTRO_FLOWS_DIR

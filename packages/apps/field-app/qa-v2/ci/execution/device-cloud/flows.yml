@@ -1,0 +1,7 @@
+pipelines:
+  next_e2e_browserstack:
+    summary: qa-v2 suite on BrowserStack real devices
+    workflows:
+      next_bs_build_app: {}
+      next_bs_run_tests:
+        depends_on: [next_bs_build_app]
