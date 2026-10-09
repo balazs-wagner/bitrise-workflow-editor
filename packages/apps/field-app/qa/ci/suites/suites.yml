@@ -1,0 +1,21 @@
+# E2E testing: one simulator track (Maestro on Bitrise machines) and one BrowserStack track.
+include:
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/flows.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/index.yml
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/flows.yml
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/jobs/index.yml
+  - path: packages/apps/field-app/qa/ci/suites/bundles/bundles.yml
+
+workflows:
+  _e2e_setup:
+    summary: Checkout, deps and E2E tooling — every E2E workflow starts here
+    steps:
+      - bundle::checkout: {}
+      - bundle::install_node_deps: {}
+      - bundle::e2e_install_tooling: {}
+
+  _e2e_teardown:
+    summary: Upload results and notify
+    steps:
+      - bundle::e2e_upload_results: {}
+      - bundle::notify_slack: {}

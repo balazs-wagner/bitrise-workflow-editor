@@ -1,0 +1,12 @@
+workflows:
+  e2e_bs_run_tests:
+    summary: Run the Appium suite on the device matrix
+    before_run:
+      - _e2e_setup
+    after_run:
+      - _e2e_teardown
+    steps:
+      - script@1:
+          title: Run on BrowserStack
+          inputs:
+            - content: yarn --cwd $APP_ROOT e2e:browserstack --app "$BROWSERSTACK_APP_URL" --devices "$BS_DEVICE_MATRIX"

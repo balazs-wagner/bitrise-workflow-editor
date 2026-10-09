@@ -1,0 +1,16 @@
+workflows:
+  next_bs_build_app:
+    summary: Device build uploaded to BrowserStack
+    steps:
+      - bundle::next_setup: {}
+      - xcode-archive@5:
+          inputs:
+            - project_path: $IOS_WORKSPACE
+            - scheme: FieldAppE2E
+            - distribution_method: development
+      - browserstack-upload@0:
+          inputs:
+            - upload_path: $BITRISE_IPA_PATH
+      - share-pipeline-variable@1:
+          inputs:
+            - variables: BROWSERSTACK_APP_URL

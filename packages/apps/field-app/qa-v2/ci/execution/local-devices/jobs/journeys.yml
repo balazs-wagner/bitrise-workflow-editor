@@ -1,0 +1,12 @@
+workflows:
+  next_sim_run_flow_tests:
+    summary: Detox flows against the simulator build
+    steps:
+      - bundle::next_setup: {}
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: next_sim_build_app
+      - bundle::next_acquire_device_lock: {}
+      - bundle::next_sim_run_detox: {}
+      - bundle::next_release_device_lock: {}
+      - bundle::next_report: {}

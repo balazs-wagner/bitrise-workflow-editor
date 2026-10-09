@@ -1,0 +1,35 @@
+workflows:
+  _e2e_sim_run_performance_tests:
+    summary: Shared body of the per-machine performance runs
+    before_run:
+      - _e2e_setup
+    steps:
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: e2e_sim_build_ios_app
+      - bundle::sim_boot_ios_simulator: {}
+      - script@1:
+          title: Run performance flows
+          inputs:
+            - content: yarn --cwd $APP_ROOT e2e:perf --machine "$PERF_MACHINE" --runs 5
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: $APP_ROOT/qa-results/perf.json:PERF_RESULTS_$PERF_MACHINE
+
+  e2e_sim_run_performance_tests_m1:
+    envs:
+      - PERF_MACHINE: m1
+    meta:
+      bitrise.io:
+        machine_type_id: g2.mac.medium
+    after_run:
+      - _e2e_sim_run_performance_tests
+
+  e2e_sim_run_performance_tests_m2:
+    envs:
+      - PERF_MACHINE: m2
+    meta:
+      bitrise.io:
+        machine_type_id: g2.mac.large
+    after_run:
+      - _e2e_sim_run_performance_tests

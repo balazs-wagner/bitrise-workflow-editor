@@ -1,0 +1,11 @@
+pipelines:
+  next_e2e_simulator:
+    summary: qa-v2 flow tests on simulators (opt-in via the qa-v2 label)
+    triggers:
+      pull_request:
+        - target_branch: main
+          label: qa-v2
+    workflows:
+      next_sim_build_app: {}
+      next_sim_run_flow_tests:
+        depends_on: [next_sim_build_app]

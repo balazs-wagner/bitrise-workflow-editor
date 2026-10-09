@@ -1,0 +1,7 @@
+# qa-v2: the rewrite of the E2E setup, running alongside e2e/ until it takes over.
+include:
+  - path: packages/apps/field-app/qa-v2/ci/execution/execution.yml
+  - path: packages/apps/field-app/qa-v2/ci/static-analysis/static-analysis.yml
+  - path: packages/apps/field-app/qa-v2/ci/stability/stability.yml
+  - path: packages/apps/field-app/qa-v2/ci/housekeeping/housekeeping.yml
+  - path: packages/apps/field-app/qa-v2/ci/common/bundles.yml

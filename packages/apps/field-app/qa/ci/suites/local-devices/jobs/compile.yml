@@ -1,0 +1,36 @@
+workflows:
+  e2e_sim_build_ios_app:
+    summary: Release-configured simulator build for E2E
+    before_run:
+      - _e2e_setup
+    steps:
+      - restore-cocoapods-cache@2: {}
+      - cocoapods-install@2:
+          inputs:
+            - source_root_path: $APP_ROOT/ios
+      - xcode-build-for-simulator@3:
+          inputs:
+            - project_path: $IOS_WORKSPACE
+            - scheme: $IOS_SCHEME
+            - configuration: Release
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: $BITRISE_APP_DIR_PATH:E2E_IOS_APP
+
+  e2e_sim_build_android_app:
+    summary: Release APK for the emulator
+    before_run:
+      - _e2e_setup
+    meta:
+      bitrise.io:
+        stack: ubuntu-noble-24.04-bitrise-2025-android
+        machine_type_id: g2.linux.large
+    steps:
+      - restore-gradle-cache@2: {}
+      - android-build@1:
+          inputs:
+            - project_location: $ANDROID_ROOT
+            - variant: e2eRelease
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: $BITRISE_APK_PATH:E2E_ANDROID_APK

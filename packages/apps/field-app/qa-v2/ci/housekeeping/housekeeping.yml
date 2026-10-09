@@ -1,0 +1,13 @@
+# Scheduled housekeeping: releases test-account locks left behind by aborted builds.
+workflows:
+  next_lock_cleanup:
+    summary: Release locks older than their TTL (runs hourly from a schedule)
+    steps:
+      - bundle::checkout: {}
+      - script@1:
+          title: Clean up stale locks
+          execution_container: node
+          service_containers:
+            - redis
+          inputs:
+            - content: node packages/infra/e2e-lock/cleanup.js --older-than 3600

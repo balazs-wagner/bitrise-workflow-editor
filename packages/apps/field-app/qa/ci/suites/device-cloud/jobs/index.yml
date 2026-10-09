@@ -1,0 +1,6 @@
+# Index of the BrowserStack workflows.
+include:
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/jobs/compile.yml
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/jobs/execute.yml
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/jobs/benchmarks.yml
+  - path: packages/apps/field-app/qa/ci/suites/device-cloud/jobs/summarize.yml

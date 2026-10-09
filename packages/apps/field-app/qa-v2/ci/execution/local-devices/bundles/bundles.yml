@@ -1,0 +1,8 @@
+step_bundles:
+  next_sim_run_detox:
+    summary: Boot a simulator and run the Detox suite
+    steps:
+      - script@1:
+          title: Detox
+          inputs:
+            - content: yarn --cwd $APP_ROOT detox test --configuration ios.sim.release --record-logs failing

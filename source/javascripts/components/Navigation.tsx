@@ -19,6 +19,7 @@ import {
 } from '@bitrise/bitkit-v2';
 import { useCallback, useEffect, useRef } from 'react';
 
+import FileTreeViewer from '@/components/FileTreeViewer/FileTreeViewer';
 import { segmentTrack } from '@/core/analytics/SegmentBaseTracking';
 import { bitriseYmlStore, getYmlString, updateBitriseYmlDocumentByString } from '@/core/stores/BitriseYmlStore';
 import { useCiConfigExpertStore } from '@/core/stores/CiConfigExpertStore';
@@ -138,9 +139,11 @@ const Navigation = (props: Props) => {
       // The width v1 had. There is no narrow icon-only mode in the design system, so the mobile rail
       // went with the migration.
       width={rem(256)}
+      // The module file tree scrolls inside the body, so the sidebar itself must not grow or scroll.
+      overflow="hidden"
       {...props}
     >
-      <BitkitPageSidebar.Body>
+      <BitkitPageSidebar.Body minHeight={0}>
         <NavigationItem
           path={withSearchParams(paths.workflows)}
           icon={IconWorkflow}
@@ -208,6 +211,7 @@ const Navigation = (props: Props) => {
             Licenses
           </NavigationItem>
         )}
+        <FileTreeViewer />
       </BitkitPageSidebar.Body>
       <BitkitPageSidebar.Footer>
         <BitkitPageSidebar.Item

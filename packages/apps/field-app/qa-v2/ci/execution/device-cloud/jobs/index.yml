@@ -1,0 +1,3 @@
+include:
+  - path: packages/apps/field-app/qa-v2/ci/execution/device-cloud/jobs/compile.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/device-cloud/jobs/execute.yml

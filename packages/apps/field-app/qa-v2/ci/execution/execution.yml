@@ -1,0 +1,6 @@
+include:
+  - path: packages/apps/field-app/qa-v2/ci/execution/local-devices/flows.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/local-devices/jobs/index.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/device-cloud/flows.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/device-cloud/jobs/index.yml
+  - path: packages/apps/field-app/qa-v2/ci/execution/bundles.yml

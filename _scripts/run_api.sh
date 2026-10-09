@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 PORT=${1:-4000}
-BITRISE_CONFIG=${2:-"./spec/integration/test_bitrise.yml"}
-BITRISE_SECRETS=${2:-"./spec/integration/test_bitrise.secrets.yml"}
+BITRISE_CONFIG=${2:-${BITRISE_CONFIG:-"./spec/integration/test_bitrise.yml"}}
+BITRISE_SECRETS=${3:-${BITRISE_SECRETS:-"./spec/integration/test_bitrise.secrets.yml"}}
 EXECUTABLE=./_bin/workflow-editor-Linux-x86_64
 
 if [[ "$OSTYPE" == "darwin"* ]]; then

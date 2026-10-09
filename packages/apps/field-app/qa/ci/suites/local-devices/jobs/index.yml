@@ -1,0 +1,9 @@
+# Index of the simulator workflows — one file per job.
+include:
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/resolve_revision.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/compile.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/journeys.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/benchmarks.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/aggregate_metrics.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/jobs/refresh_reference.yml
+  - path: packages/apps/field-app/qa/ci/suites/local-devices/bundles/bundles.yml
