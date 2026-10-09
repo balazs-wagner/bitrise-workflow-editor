@@ -9,7 +9,7 @@ import { useSelectedNodeId, useTree } from '@/hooks/useTree';
 import FileTreeView from './FileTreeView';
 
 /**
- * The module file tree, rendered as a section of the page sidebar under the navigation items.
+ * The module file tree, rendered in the page sidebar between the navigation and the footer links.
  * Only a modular config (one with `include:`) has a tree, so a single-file config renders nothing.
  */
 const FileTreeViewer = () => {
@@ -23,21 +23,15 @@ const FileTreeViewer = () => {
 
   return (
     <>
-      {/* Full-bleed, unlike the sidebar's default inset divider. */}
-      <BitkitPageSidebar.Divider marginInline="0" marginBlockEnd="0" flexShrink={0} />
-      {/* Takes whatever height the nav items and footer leave, and scrolls on both axes inside it
-          rather than growing the sidebar. Labels never wrap — deep paths scroll sideways instead. */}
-      <Box
-        flex="1"
-        minHeight={0}
-        overflow="auto"
-        paddingBlockStart="16"
-        paddingBlockEnd="8"
-        css={{ '& *': { whiteSpace: 'nowrap' } }}
-      >
+      {/* Separates the tree from the nav items above it. Full-bleed, unlike the sidebar's default
+          inset divider. */}
+      <BitkitPageSidebar.Divider marginInline="0" marginBlockStart="0" flexShrink={0} />
+      {/* Fills the space between the navigation and the footer. Scrolls on both axes inside
+          it rather than growing the sidebar. Labels never wrap — deep paths scroll sideways instead. */}
+      <Box flex="1 1 0" minHeight={0} overflow="auto" css={{ '& *': { whiteSpace: 'nowrap' } }}>
         {/* 24px inline padding lines the group headers up with the nav items; the tree's own 8px inset
             indents the file rows under them. max-content lets the tree be wider than the sidebar. */}
-        <Box width="max-content" minWidth="full" paddingInline="24">
+        <Box width="max-content" minWidth="full" paddingInline="24" paddingBlockEnd="8">
           <FileTreeView
             rootNode={tree}
             selectedNodeId={selectedNodeId}
