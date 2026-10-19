@@ -1,6 +1,5 @@
 import { BitkitPageSidebar } from '@bitrise/bitkit-v2';
 import { Box } from '@chakra-ui/react/box';
-import { useSlotRecipe } from '@chakra-ui/react/styled-system';
 import { Text } from '@chakra-ui/react/text';
 
 import { trackWorkflowEditorYmlModuleOpened } from '@/core/analytics/ConfigManagementAnalytics';
@@ -18,8 +17,6 @@ const FileTreeViewer = () => {
   const tree = useTree();
   const selectedNodeId = useSelectedNodeId();
   const { openFile } = useFileTabs();
-  // The nav items' own label style (size, weight, colour, responsive steps), so the title matches them.
-  const titleStyles = useSlotRecipe({ key: 'pageSidebar' })();
 
   if (!tree) {
     return null;
@@ -30,18 +27,19 @@ const FileTreeViewer = () => {
       {/* Separates the tree from the nav items above it. Full-bleed, unlike the sidebar's default
           inset divider. */}
       <BitkitPageSidebar.Divider marginInline="0" marginBlockStart="0" marginBlockEnd="0" flexShrink={0} />
-      {/* The section title sits outside the scroll area, so it stays put while the tree scrolls. Same
-          type, colour and row height as the nav items, minus the icon. */}
-      {/* Mirrors a nav row: the row's padding (24 inline, 12/8 block), the content block's (0/2 block),
-          and the label slot, minus its flex: 1 (it grows to fill a row; here it keeps its own height). */}
-      <Box flexShrink={0} paddingInline="24" paddingBlock={{ base: '12', tablet: '8' }}>
-        <Text
-          paddingBlock={{ base: '0', tablet: '2' }}
-          css={[titleStyles.itemLabel, { flex: 'none', display: 'block' }]}
-        >
-          Configuration modules
-        </Text>
-      </Box>
+      {/* The section title: a Bitkit H4, outside the scroll area so it stays put while the tree
+          scrolls. 24px inline padding lines it up with the nav items' left edge. */}
+      <Text
+        as="h4"
+        flexShrink={0}
+        paddingInline="24"
+        paddingBlockStart="16"
+        paddingBlockEnd="8"
+        textStyle="heading/h4"
+        color="text/primary"
+      >
+        Configuration modules
+      </Text>
       {/* Fills the space between the title and the footer. Scrolls on both axes inside it rather than
           growing the sidebar. Labels never wrap — deep paths scroll sideways instead. */}
       <Box flex="1 1 0" minHeight={0} overflow="auto" css={{ '& *': { whiteSpace: 'nowrap' } }}>
