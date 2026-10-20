@@ -12,6 +12,8 @@ type Props = {
   selectedNodeId?: string;
   onSelect: (nodeId: string) => void;
   isNodeDisabled?: (node: TreeNode) => boolean;
+  /** Hide the group header when there is only one group (its label is shown elsewhere). */
+  hideSingleGroupHeader?: boolean;
 };
 
 // Folder ids are path strings, file ids are node_ids.
@@ -112,7 +114,7 @@ const GroupTree = ({
   );
 };
 
-const FileTreeView = ({ rootNode, filter, selectedNodeId, onSelect, isNodeDisabled }: Props) => {
+const FileTreeView = ({ rootNode, filter, selectedNodeId, onSelect, isNodeDisabled, hideSingleGroupHeader }: Props) => {
   const projectRepoLabel = PageProps.app()?.gitRepoSlug || PageProps.app()?.name || 'This repository';
 
   const groups = useMemo(
@@ -120,27 +122,31 @@ const FileTreeView = ({ rootNode, filter, selectedNodeId, onSelect, isNodeDisabl
     [rootNode, projectRepoLabel, filter],
   );
 
+  const showHeaders = !(hideSingleGroupHeader && groups.length === 1);
+
   return (
     <Box display="flex" flexDirection="column" gap="16">
       {groups.map((group) => (
         <Box key={group.key} display="flex" flexDirection="column">
           {/* No `px`: header left-aligns with the title while the tree's own 8px inset indents file rows. */}
-          <Box display="flex" alignItems="center" gap="4" py="6">
-            <Text textStyle="body/md/semibold">{group.header}</Text>
-            {group.isReadOnly && (
-              <BitkitTooltip text="Modules included from another repository or ref are read-only.">
-                {/* Focusable + labelled so the read-only explanation is reachable by keyboard and
+          {showHeaders && (
+            <Box display="flex" alignItems="center" gap="4" py="6" data-file-tree-group-header="">
+              <Text textStyle="body/md/semibold">{group.header}</Text>
+              {group.isReadOnly && (
+                <BitkitTooltip text="Modules included from another repository or ref are read-only.">
+                  {/* Focusable + labelled so the read-only explanation is reachable by keyboard and
                     announced by screen readers, while staying non-actionable (not a button). */}
-                <IconInfoCircle
-                  size="16"
-                  color="icon/tertiary"
-                  tabIndex={0}
-                  role="img"
-                  aria-label="Read-only — included from another repository or ref"
-                />
-              </BitkitTooltip>
-            )}
-          </Box>
+                  <IconInfoCircle
+                    size="16"
+                    color="icon/tertiary"
+                    tabIndex={0}
+                    role="img"
+                    aria-label="Read-only — included from another repository or ref"
+                  />
+                </BitkitTooltip>
+              )}
+            </Box>
+          )}
           <GroupTree
             group={group}
             selectedNodeId={selectedNodeId}

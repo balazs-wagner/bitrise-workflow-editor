@@ -21,6 +21,7 @@ import { Box } from '@chakra-ui/react/box';
 import { useCallback, useEffect, useRef } from 'react';
 
 import FileTreeViewer from '@/components/FileTreeViewer/FileTreeViewer';
+import { useSidebarVariant } from '@/components/FileTreeViewer/useSidebarVariant';
 import { segmentTrack } from '@/core/analytics/SegmentBaseTracking';
 import { bitriseYmlStore, getYmlString, updateBitriseYmlDocumentByString } from '@/core/stores/BitriseYmlStore';
 import { useCiConfigExpertStore } from '@/core/stores/CiConfigExpertStore';
@@ -92,6 +93,7 @@ const NavigationItem = ({ children, path, icon, intercomTarget }: NavigationItem
 };
 
 const Navigation = (props: Props) => {
+  const sidebarVariant = useSidebarVariant();
   const currentPage = useCurrentPage();
   const isDefaultTabRef = useRef(true);
   const { data } = useCiConfigSettings();
@@ -142,7 +144,8 @@ const Navigation = (props: Props) => {
       minHeight="auto"
       // The width v1 had. There is no narrow icon-only mode in the design system, so the mobile rail
       // went with the migration.
-      width={rem(256)}
+      // DESIGN EXPLORATION: variant 6 widens the sidebar; the rest keep v1's 256.
+      width={rem(sidebarVariant.sidebarWidth)}
       // The navigation and the file tree each scroll inside their own area, so the sidebar itself
       // must not grow or scroll.
       overflow="hidden"
