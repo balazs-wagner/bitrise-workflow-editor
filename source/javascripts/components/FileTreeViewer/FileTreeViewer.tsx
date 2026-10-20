@@ -42,10 +42,21 @@ const FileTreeViewer = () => {
       </Text>
       {/* Fills the space between the title and the footer. Scrolls on both axes inside it rather than
           growing the sidebar. Labels never wrap — deep paths scroll sideways instead. */}
-      <Box flex="1 1 0" minHeight={0} overflow="auto" css={{ '& *': { whiteSpace: 'nowrap' } }}>
-        {/* 24px inline padding lines the group headers up with the nav items; the tree's own 8px inset
-            indents the file rows under them. max-content lets the tree be wider than the sidebar. */}
-        <Box width="max-content" minWidth="full" paddingInline="24" paddingBlockEnd="8">
+      <Box
+        flex="1 1 0"
+        minHeight={0}
+        overflow="auto"
+        css={{
+          '& *': { whiteSpace: 'nowrap' },
+          // Keeps the group header's text on the sidebar's 24px edge, in line with the title.
+          '& [data-file-tree-group-header]': { paddingInlineStart: '8' },
+        }}
+      >
+        {/* The tree hangs from the nav's icon column: 16 + the tree's own 8px inset puts the top-level
+            icons at 24, under the nav icons, and deeper levels indent from there. Only 8 at the end, so
+            long names get more of the sidebar's width. max-content lets the tree be wider than the
+            sidebar. */}
+        <Box width="max-content" minWidth="full" paddingInlineStart="16" paddingInlineEnd="8" paddingBlockEnd="8">
           <FileTreeView
             rootNode={tree}
             selectedNodeId={selectedNodeId}
