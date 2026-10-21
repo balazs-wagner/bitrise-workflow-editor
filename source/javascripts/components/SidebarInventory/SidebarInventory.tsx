@@ -342,12 +342,18 @@ const SidebarInventory = () => {
         </Box>
       </BitkitTabs.Root>
       {/* Searches every list in the tab; the query is shared by both tabs. */}
-      {/* Compact: 32px instead of the smallest Bitkit size (md, 40px), with tighter padding around it. */}
+      {/* Borderless and full-bleed: a quiet row under the tabs rather than a boxed field. 24px inline
+          padding puts the search icon on the sidebar's 24px edge, under the tab labels. */}
       <Box
         flexShrink={0}
-        paddingInline="16"
-        paddingBlock="8"
-        css={{ '& .bitkit-text-input__field': { '--input-height': '2rem', paddingInline: '8' } }}
+        css={{
+          '& .bitkit-text-input__field': {
+            borderWidth: 0,
+            borderRadius: 0,
+            background: 'transparent',
+            paddingInline: '24',
+          },
+        }}
       >
         <BitkitSearchInput
           size="md"
