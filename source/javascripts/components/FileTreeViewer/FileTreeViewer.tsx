@@ -13,7 +13,7 @@ import FileTreeView from './FileTreeView';
  * The module file tree, rendered in the page sidebar between the navigation and the footer links.
  * Only a modular config (one with `include:`) has a tree, so a single-file config renders nothing.
  */
-const FileTreeViewer = () => {
+const FileTreeViewer = ({ showDivider = true }: { showDivider?: boolean }) => {
   const tree = useTree();
   const selectedNodeId = useSelectedNodeId();
   const { openFile } = useFileTabs();
@@ -26,7 +26,9 @@ const FileTreeViewer = () => {
     <>
       {/* Separates the tree from the nav items above it. Full-bleed, unlike the sidebar's default
           inset divider. */}
-      <BitkitPageSidebar.Divider marginInline="0" marginBlockStart="0" marginBlockEnd="0" flexShrink={0} />
+      {showDivider && (
+        <BitkitPageSidebar.Divider marginInline="0" marginBlockStart="0" marginBlockEnd="0" flexShrink={0} />
+      )}
       {/* The section title: a Bitkit H4, outside the scroll area so it stays put while the tree
           scrolls. 24px inline padding lines it up with the nav items' left edge. */}
       <Text
@@ -64,7 +66,9 @@ const FileTreeViewer = () => {
               // Only a not-yet-open tab counts as opening a module (re-selecting an open tab doesn't).
               const alreadyOpen = bitriseYmlStore.getState().openTabs.some((tab) => tab.nodeId === nodeId);
               if (!alreadyOpen) {
-                trackWorkflowEditorYmlModuleOpened({ openMethod: 'file_explorer' });
+                trackWorkflowEditorYmlModuleOpened({
+                  openMethod: 'file_explorer',
+                });
               }
               openFile(nodeId);
             }}
