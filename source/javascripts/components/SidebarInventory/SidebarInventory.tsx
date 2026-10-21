@@ -342,15 +342,21 @@ const SidebarInventory = () => {
         </Box>
       </BitkitTabs.Root>
       {/* Searches every list in the tab; the query is shared by both tabs. */}
-      {/* Borderless and full-bleed: a quiet row under the tabs rather than a boxed field. 24px inline
-          padding puts the search icon on the sidebar's 24px edge, under the tab labels. */}
+      {/* Borderless and full-bleed, like the workspace switcher's search: a quiet row under the tabs with
+          a divider below it. 24px inline padding puts the search icon on the sidebar's 24px edge, under
+          the tab labels. The text input styles its field through the css prop (no class to target), so
+          the field is reached as the box that holds the input's label. */}
       <Box
         flexShrink={0}
+        paddingBlock="4"
+        borderBlockEnd="1px solid"
+        borderColor="border/regular"
         css={{
-          '& .bitkit-text-input__field': {
+          '& div:has(> label > input)': {
             borderWidth: 0,
             borderRadius: 0,
             background: 'transparent',
+            boxShadow: 'none',
             paddingInline: '24',
           },
         }}
