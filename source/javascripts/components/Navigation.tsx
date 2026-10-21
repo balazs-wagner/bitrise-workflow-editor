@@ -1,101 +1,34 @@
 import {
-  BitkitIconComponent,
   BitkitPageSidebar,
   BitkitPageSidebarProps,
-  createBitkitToast,
   IconArrowNortheast,
   IconBook,
-  IconContainer,
   IconDoc,
-  IconDollar,
-  IconKey,
-  IconLock,
-  IconStack,
-  IconStep,
-  IconTrigger,
-  IconWorkflow,
-  IconWorkflowFlow,
   rem,
 } from '@bitrise/bitkit-v2';
 import { Box } from '@chakra-ui/react/box';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import FileTreeViewer from '@/components/FileTreeViewer/FileTreeViewer';
+import SidebarInventory from '@/components/SidebarInventory/SidebarInventory';
 import { segmentTrack } from '@/core/analytics/SegmentBaseTracking';
 import { bitriseYmlStore, getYmlString, updateBitriseYmlDocumentByString } from '@/core/stores/BitriseYmlStore';
 import { useCiConfigExpertStore } from '@/core/stores/CiConfigExpertStore';
 import PageProps from '@/core/utils/PageProps';
-import RuntimeUtils from '@/core/utils/RuntimeUtils';
 import WindowUtils from '@/core/utils/WindowUtils';
 import { useCiConfigSettings } from '@/hooks/useCiConfigSettings';
 import useCurrentPage from '@/hooks/useCurrentPage';
-import useHashLocation from '@/hooks/useHashLocation';
 import useParentMessageListener from '@/hooks/useParentMessageListener';
-import useSearchParams from '@/hooks/useSearchParams';
-import useVisualEditorNotice from '@/hooks/useVisualEditorNotice';
-import { paths } from '@/routes';
 
 type Props = Omit<BitkitPageSidebarProps, 'children'> & {
-  /** Collapses the page navigation so only the module file tree is left (YAML view of a modular config). */
+  /** Collapses the inventory so only the module file tree is left (YAML view of a modular config). */
   hidePageNav?: boolean;
-};
-type NavigationItemProps = {
-  children: string;
-  path: string;
-  icon: BitkitIconComponent;
-  intercomTarget?: string;
-};
-
-function usePathWithSearchParams() {
-  const [searchParams] = useSearchParams();
-
-  return useCallback(
-    (path: string) => {
-      const searchParamsString = new URLSearchParams(searchParams).toString();
-      return searchParamsString ? `${path}?${searchParamsString}` : path;
-    },
-    [searchParams],
-  );
-}
-
-const NavigationItem = ({ children, path, icon, intercomTarget }: NavigationItemProps) => {
-  const [hashPath, navigate] = useHashLocation();
-  const isSelected = hashPath.startsWith(path);
-  // Schema/marker errors don't block navigation: the visual pages render any config they can read.
-  // Blocking on the broader validation status trapped users on the current page whenever the YAML
-  // was merely schema-invalid (SSW-3087).
-  const visualEditorNotice = useVisualEditorNotice();
-
-  const handleNavigation = useCallback(() => {
-    if (visualEditorNotice?.disabled && !path.startsWith(paths.yml)) {
-      createBitkitToast({
-        variant: visualEditorNotice.severity,
-        titleText: visualEditorNotice.title,
-        messageText: visualEditorNotice.description,
-      });
-      return;
-    }
-
-    navigate(path);
-  }, [visualEditorNotice, navigate, path]);
-
-  return (
-    <BitkitPageSidebar.Item
-      data-intercom-target={intercomTarget}
-      icon={icon}
-      onClick={handleNavigation}
-      selected={isSelected}
-    >
-      {children}
-    </BitkitPageSidebar.Item>
-  );
 };
 
 const Navigation = ({ hidePageNav = false, ...props }: Props) => {
   const currentPage = useCurrentPage();
   const isDefaultTabRef = useRef(true);
   const { data } = useCiConfigSettings();
-  const withSearchParams = usePathWithSearchParams();
   const yamlSelector = currentPage === 'workflows' || currentPage === 'pipelines' ? currentPage : undefined;
 
   useParentMessageListener<{
@@ -148,90 +81,22 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
       overflow="hidden"
       {...props}
     >
-      {/* Page navigation, at its natural height. It only scrolls if the window is too short for it.
-          In the YAML view of a modular config it collapses away (0fr ↔ 1fr row, animated), so the
-          module tree slides up rather than jumping when the view changes. */}
+      {/* The inventory replaces the page navigation. With a module tree below it, the two share the
+          height; without one, it fills the sidebar. In the YAML view of a modular config it collapses
+          away (flex-grow 1 → 0, animated), so the module tree slides up rather than jumping. */}
       <Box
-        flex="0 1 auto"
+        flexGrow={hidePageNav ? 0 : 1}
+        flexShrink={1}
+        flexBasis="0"
         minHeight={0}
-        display="grid"
-        gridTemplateRows={hidePageNav ? '0fr' : '1fr'}
-        // visibility interpolates, so the nav stays visible while it closes, then leaves the tab order.
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+        // visibility interpolates, so the panel stays visible while it closes, then leaves the tab order.
         visibility={hidePageNav ? 'hidden' : 'visible'}
-        transition="grid-template-rows 200ms ease-out, visibility 200ms"
+        transition="flex-grow 200ms ease-out, visibility 200ms"
       >
-        {/* The grid row can only close to 0 if its child clips: the Body's own padding would hold it open. */}
-        <Box minHeight={0} overflow="hidden" display="flex" flexDirection="column">
-          <BitkitPageSidebar.Body minHeight={0} overflowY="auto">
-            <NavigationItem
-              path={withSearchParams(paths.workflows)}
-              icon={IconWorkflow}
-              intercomTarget="Workflows Page Navigation Item"
-            >
-              Workflows
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.pipelines)}
-              icon={IconWorkflowFlow}
-              intercomTarget="Pipelines Page Navigation Item"
-            >
-              Pipelines
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.stepBundles)}
-              icon={IconStep}
-              intercomTarget="Step Bundles Page Navigation Item"
-            >
-              Step bundles
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.secrets)}
-              icon={IconLock}
-              intercomTarget="Secrets Page Navigation Item"
-            >
-              Secrets
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.envVars)}
-              icon={IconDollar}
-              intercomTarget="Env Vars Page Navigation Item"
-            >
-              Env Vars
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.triggers)}
-              icon={IconTrigger}
-              intercomTarget="Triggers Page Navigation Item"
-            >
-              Triggers
-            </NavigationItem>
-            <NavigationItem
-              path={withSearchParams(paths.containers)}
-              icon={IconContainer}
-              intercomTarget="Containers Page Navigation Item"
-            >
-              Containers
-            </NavigationItem>
-            {RuntimeUtils.isWebsiteMode() && (
-              <NavigationItem
-                path={withSearchParams(paths.stacksAndMachines)}
-                icon={IconStack}
-                intercomTarget="Stacks & Machines Page Navigation Item"
-              >
-                Stacks & Machines
-              </NavigationItem>
-            )}
-            {RuntimeUtils.isWebsiteMode() && (
-              <NavigationItem
-                path={withSearchParams(paths.licenses)}
-                icon={IconKey}
-                intercomTarget="Licenses Page Navigation Item"
-              >
-                Licenses
-              </NavigationItem>
-            )}
-          </BitkitPageSidebar.Body>
-        </Box>
+        <SidebarInventory />
       </Box>
       {/* Modular configs only: the module file tree, filling the space between the navigation and
           the footer. */}
