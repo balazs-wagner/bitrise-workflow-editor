@@ -1,8 +1,11 @@
 import {
+  BitkitControlButton,
   BitkitIconComponent,
   BitkitPageSidebar,
   BitkitTabs,
   createBitkitToast,
+  IconChevronDown,
+  IconChevronRight,
   IconContainer,
   IconDollar,
   IconKey,
@@ -149,7 +152,14 @@ const withParams = (path: string, params: Record<string, string>) => {
   return search ? `${path}?${search}` : path;
 };
 
-const InventoryGroup = ({ group, items }: { group: Group; items?: InventoryItem[] }) => {
+type InventoryGroupProps = {
+  group: Group;
+  items?: InventoryItem[];
+  isCollapsed: boolean;
+  onToggle: () => void;
+};
+
+const InventoryGroup = ({ group, items, isCollapsed, onToggle }: InventoryGroupProps) => {
   const [hashPath] = useHashLocation();
   const [searchParams] = useSearchParams();
   const navigate = useGuardedNavigate();
@@ -157,45 +167,67 @@ const InventoryGroup = ({ group, items }: { group: Group; items?: InventoryItem[
 
   return (
     <Box display="flex" flexDirection="column">
-      {/* The group title doubles as the link to its page, so an empty group can still be opened. */}
-      <BitkitPageSidebar.Item
-        data-intercom-target={group.intercomTarget}
-        icon={group.icon}
-        // Kinds whose entities can't be selected one by one mark the page itself.
-        selected={isOnPage && !group.param}
-        badge={
-          items ? (
-            <Text as="span" textStyle="body/sm/regular" color="text/tertiary">
-              {items.length}
-            </Text>
-          ) : undefined
-        }
-        onClick={() => navigate(withParams(group.path, getSearchParamsFromLocationHash()))}
-      >
-        {group.title}
-      </BitkitPageSidebar.Item>
-      {items?.map((item) => {
-        const isSelected = Boolean(group.param) && isOnPage && searchParams[group.param as string] === item.id;
-        return (
-          <BitkitPageSidebar.Item
-            key={item.id}
-            // Labels start under the title's label: 24 edge + 16 icon + 12 gap.
-            paddingInlineStart="52"
-            paddingBlock="4"
-            selected={isSelected}
-            onClick={() => {
-              if (group.param) {
-                const params = omit(getSearchParamsFromLocationHash(), ENTITY_PARAMS);
-                navigate(withParams(group.path, { ...params, [group.param]: item.id }));
-              } else {
-                navigate(withParams(group.path, getSearchParamsFromLocationHash()));
-              }
-            }}
-          >
-            {item.label}
-          </BitkitPageSidebar.Item>
-        );
-      })}
+      {/* The group title doubles as the link to its page, so an empty group can still be opened. Groups
+          that list entities get a tinted title row with a chevron that collapses the list. */}
+      <Box display="flex" alignItems="center" background={items ? 'background/secondary' : undefined}>
+        <BitkitPageSidebar.Item
+          data-intercom-target={group.intercomTarget}
+          // The row carries the tint; the title's own hover fill goes one step darker.
+          flex="1"
+          minWidth={0}
+          paddingInlineEnd={items ? '8' : undefined}
+          background={items ? 'transparent' : undefined}
+          _hover={items ? { background: 'background/tertiary' } : undefined}
+          icon={group.icon}
+          // Kinds whose entities can't be selected one by one mark the page itself.
+          selected={isOnPage && !group.param}
+          badge={
+            items ? (
+              <Text as="span" textStyle="body/sm/regular" color="text/tertiary">
+                {items.length}
+              </Text>
+            ) : undefined
+          }
+          onClick={() => navigate(withParams(group.path, getSearchParamsFromLocationHash()))}
+        >
+          {group.title}
+        </BitkitPageSidebar.Item>
+        {items && (
+          // Its own control, next to the title row rather than inside it (the row is a button).
+          <Box paddingInlineEnd="8" flexShrink={0}>
+            <BitkitControlButton
+              icon={isCollapsed ? IconChevronRight : IconChevronDown}
+              size="xs"
+              label={isCollapsed ? `Expand ${group.title}` : `Collapse ${group.title}`}
+              aria-expanded={!isCollapsed}
+              onClick={onToggle}
+            />
+          </Box>
+        )}
+      </Box>
+      {!isCollapsed &&
+        items?.map((item) => {
+          const isSelected = Boolean(group.param) && isOnPage && searchParams[group.param as string] === item.id;
+          return (
+            <BitkitPageSidebar.Item
+              key={item.id}
+              // Labels start under the title's label: 24 edge + 16 icon + 12 gap.
+              paddingInlineStart="52"
+              paddingBlock="4"
+              selected={isSelected}
+              onClick={() => {
+                if (group.param) {
+                  const params = omit(getSearchParamsFromLocationHash(), ENTITY_PARAMS);
+                  navigate(withParams(group.path, { ...params, [group.param]: item.id }));
+                } else {
+                  navigate(withParams(group.path, getSearchParamsFromLocationHash()));
+                }
+              }}
+            >
+              {item.label}
+            </BitkitPageSidebar.Item>
+          );
+        })}
     </Box>
   );
 };
@@ -209,6 +241,8 @@ const SidebarInventory = () => {
   const inventory = useInventory();
   const [tab, setTab] = useState<TabId>(() => tabOfPage(currentPage));
   const isWebsiteMode = RuntimeUtils.isWebsiteMode();
+  // Collapsed groups, by page path. Lives here so switching tabs keeps it; resets on reload.
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   // Follow the page: landing on a config page shows the Config tab, and vice versa. Adjusted during
   // render (not in an effect) when the page changes; the tab stays the user's choice otherwise.
@@ -236,11 +270,17 @@ const SidebarInventory = () => {
           </BitkitTabs.List>
         </Box>
       </BitkitTabs.Root>
-      <Box flex="1" minHeight={0} overflowY="auto" paddingBlock="8" display="flex" flexDirection="column" gap="8">
+      <Box flex="1" minHeight={0} overflowY="auto" paddingBlock="8" display="flex" flexDirection="column" gap="4">
         {activeTab.groups
           .filter((group) => isWebsiteMode || !group.websiteModeOnly)
           .map((group) => (
-            <InventoryGroup key={group.path} group={group} items={group.items ? inventory[group.items] : undefined} />
+            <InventoryGroup
+              key={group.path}
+              group={group}
+              items={group.items ? inventory[group.items] : undefined}
+              isCollapsed={Boolean(collapsed[group.path])}
+              onToggle={() => setCollapsed((prev) => ({ ...prev, [group.path]: !prev[group.path] }))}
+            />
           ))}
       </Box>
     </Box>

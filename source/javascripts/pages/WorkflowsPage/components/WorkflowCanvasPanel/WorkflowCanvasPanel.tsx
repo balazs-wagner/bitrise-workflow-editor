@@ -21,7 +21,6 @@ import { useIsMergedConfigSelected, useTree } from '@/hooks/useTree';
 import useYmlHasChanges from '@/hooks/useYmlHasChanges';
 
 import { useWorkflowsPageStore, WorkflowsPageDialogType } from '../../WorkflowsPage.store';
-import WorkflowSelector from '../WorkflowSelector/WorkflowSelector';
 
 type Props = {
   workflowId: string;
@@ -388,16 +387,17 @@ const WorkflowCanvasPanel = ({ workflowId }: Props) => {
 
   return (
     <Box height="100%" display="flex" flexDirection="column" minWidth={[256, 320, 400]}>
-      <Box
-        padding="12"
-        display="flex"
-        gap="12"
-        background="background/primary"
-        borderBottom="1px solid"
-        borderColor="border/regular"
-      >
-        <WorkflowSelector />
-        {RuntimeUtils.isWebsiteMode() && (
+      {/* The workflow selector moved to the sidebar inventory; the bar stays only for Run. */}
+      {RuntimeUtils.isWebsiteMode() && (
+        <Box
+          padding="12"
+          display="flex"
+          justifyContent="flex-end"
+          gap="12"
+          background="background/primary"
+          borderBottom="1px solid"
+          borderColor="border/regular"
+        >
           <IconButton
             size="md"
             iconName="Play"
@@ -409,8 +409,8 @@ const WorkflowCanvasPanel = ({ workflowId }: Props) => {
             isDisabled={WorkflowService.isUtilityWorkflow(workflowId) || isModularFileTab || hasUnsavedChanges}
             onClick={() => openRunWorkflowDialog(workflowId)}
           />
-        )}
-      </Box>
+        </Box>
+      )}
       <Box
         flex="1"
         overflowY="auto"

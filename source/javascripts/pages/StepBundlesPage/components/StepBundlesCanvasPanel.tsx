@@ -11,7 +11,6 @@ import { useShallow } from '@/hooks/useShallow';
 import { useStepBundles } from '@/hooks/useStepBundles';
 
 import { StepBundlesPageDialogType, useStepBundlesPageStore } from '../StepBundlesPage.store';
-import StepBundlesSelector from './StepBundlesSelector';
 
 type Props = {
   stepBundleId: string;
@@ -176,9 +175,7 @@ const StepBundlesCanvasPanel = ({ stepBundleId }: Props) => {
 
   return (
     <Box height="100%" display="flex" flexDirection="column" minWidth={[256, 320, 400]}>
-      <Box padding="12" gap="12" background="background/primary" borderBottom="1px solid" borderColor="border/regular">
-        <StepBundlesSelector />
-      </Box>
+      {/* The step bundle selector moved to the sidebar inventory. */}
       <Box
         display="flex"
         flexDirection="column"
