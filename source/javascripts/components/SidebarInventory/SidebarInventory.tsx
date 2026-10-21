@@ -275,7 +275,7 @@ const firstListGroup = (tabId: TabId) => TABS.find((t) => t.id === tabId)?.group
 /**
  * Replaces the page navigation: two tabs, each listing what the active document (the selected module,
  * the merged config, or a single-file config) defines, grouped by kind. One group is open at a time; it
- * fills the panel under the search field, and the closed group headers stack at the bottom (or at the top when every group is closed).
+ * grows to fill the panel, pushing the headers after it to the bottom; the order never changes.
  */
 const SidebarInventory = () => {
   const currentPage = useCurrentPage();
@@ -325,7 +325,6 @@ const SidebarInventory = () => {
     }
   }
   const openGroup = groups.find((g) => g.path === openPath);
-  const closedGroups = groups.filter((g) => g !== openGroup);
   const setOpen = (path: string, isOpen: boolean) => setOpenByTab((prev) => ({ ...prev, [tab]: isOpen ? path : null }));
 
   return (
@@ -343,7 +342,13 @@ const SidebarInventory = () => {
         </Box>
       </BitkitTabs.Root>
       {/* Searches every list in the tab; the query is shared by both tabs. */}
-      <Box flexShrink={0} paddingInline="16" paddingBlockStart="12" paddingBlockEnd="8">
+      {/* Compact: 32px instead of the smallest Bitkit size (md, 40px), with tighter padding around it. */}
+      <Box
+        flexShrink={0}
+        paddingInline="16"
+        paddingBlock="8"
+        css={{ '& .bitkit-text-input__field': { '--input-height': '2rem', paddingInline: '8' } }}
+      >
         <BitkitSearchInput
           size="md"
           placeholder={tab === 'buildingBlocks' ? 'Search building blocks' : 'Search config'}
@@ -351,31 +356,31 @@ const SidebarInventory = () => {
           onChange={setQuery}
         />
       </Box>
-      {/* The open group, filling the space above the closed headers. With every group closed it isn't
-          rendered, so the headers sit right under the search field instead of at the bottom. */}
-      {openGroup && (
-        <Box flex="1" minHeight={0} display="flex" flexDirection="column">
-          <GroupHeader
-            group={openGroup}
-            items={itemsOf(openGroup)}
-            isOpen
-            onOpenChange={(isOpen) => setOpen(openGroup.path, isOpen)}
-          />
-          <GroupList group={openGroup} items={itemsOf(openGroup) ?? []} query={needle} />
-        </Box>
-      )}
-      {/* Closed group headers (and plain page links), in their usual order: at the bottom while a group is
-          open, at the top when none is. */}
-      <Box flexShrink={0} display="flex" flexDirection="column" gap="4" paddingBlock="8">
-        {closedGroups.map((group) => (
-          <GroupHeader
-            key={group.path}
-            group={group}
-            items={itemsOf(group)}
-            isOpen={false}
-            onOpenChange={(isOpen) => setOpen(group.path, isOpen)}
-          />
-        ))}
+      {/* Groups always keep their order (Pipelines, Workflows, Step bundles). The open one grows to fill
+          the panel and its list scrolls, so the headers after it end up at the bottom; with every group
+          closed, they all sit at the top. */}
+      <Box flex="1" minHeight={0} display="flex" flexDirection="column" gap="4" paddingBlockEnd="8">
+        {groups.map((group) => {
+          const isOpen = group === openGroup;
+          return (
+            <Box
+              key={group.path}
+              display="flex"
+              flexDirection="column"
+              flex={isOpen ? '1' : undefined}
+              minHeight={isOpen ? 0 : undefined}
+              flexShrink={isOpen ? 1 : 0}
+            >
+              <GroupHeader
+                group={group}
+                items={itemsOf(group)}
+                isOpen={isOpen}
+                onOpenChange={(open) => setOpen(group.path, open)}
+              />
+              {isOpen && <GroupList group={group} items={itemsOf(group) ?? []} query={needle} />}
+            </Box>
+          );
+        })}
       </Box>
     </Box>
   );
