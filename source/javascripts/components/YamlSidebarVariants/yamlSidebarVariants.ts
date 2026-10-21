@@ -2,7 +2,7 @@
 // Pick one and delete this folder (and the switcher in MainLayout) before anything ships.
 import { useSyncExternalStore } from 'react';
 
-export type YamlSidebarVariantId = 'hidden' | 'treeOnly' | 'full' | 'collapsible';
+export type YamlSidebarVariantId = 'hidden' | 'treeOnly' | 'full';
 
 export const YAML_SIDEBAR_VARIANTS: {
   id: YamlSidebarVariantId;
@@ -11,7 +11,6 @@ export const YAML_SIDEBAR_VARIANTS: {
   { id: 'hidden', label: '0 · Hidden (current)' },
   { id: 'treeOnly', label: '1 · Tree only' },
   { id: 'full', label: '2 · Full sidebar' },
-  { id: 'collapsible', label: '3 · Tree only, collapsible' },
 ];
 
 /** A value kept in localStorage that components can subscribe to. Storage failures fall back to the default. */
@@ -53,21 +52,6 @@ export const yamlSidebarVariantStore = createStoredValue<YamlSidebarVariantId>(
   (v) => YAML_SIDEBAR_VARIANTS.some((variant) => variant.id === v),
 );
 
-/** Variant 3 only: whether the tree is collapsed in the YAML view. Open by default. */
-export const yamlTreeCollapsedStore = createStoredValue<'true' | 'false'>(
-  'dsg.yamlTreeCollapsed',
-  'false',
-  (v) => v === 'true' || v === 'false',
-);
-
 export function useYamlSidebarVariant() {
   return useSyncExternalStore(yamlSidebarVariantStore.subscribe, yamlSidebarVariantStore.getSnapshot);
-}
-
-export function useYamlTreeCollapsed() {
-  return useSyncExternalStore(yamlTreeCollapsedStore.subscribe, yamlTreeCollapsedStore.getSnapshot) === 'true';
-}
-
-export function toggleYamlTreeCollapsed() {
-  yamlTreeCollapsedStore.set(yamlTreeCollapsedStore.getSnapshot() === 'true' ? 'false' : 'true');
 }

@@ -38,12 +38,16 @@ import { paths } from '@/routes';
 type Props = Omit<BitkitPageSidebarProps, 'children'> & {
   /** DESIGN EXPLORATION: collapses the page navigation so only the module file tree is left (YAML view). */
   hidePageNav?: boolean;
+  /** DESIGN EXPLORATION: keeps the page navigation visible but disabled (YAML view, variant 2). */
+  disablePageNav?: boolean;
 };
 type NavigationItemProps = {
   children: string;
   path: string;
   icon: BitkitIconComponent;
   intercomTarget?: string;
+  /** DESIGN EXPLORATION: page items are disabled in the YAML view (variant 2). */
+  disabled?: boolean;
 };
 
 function usePathWithSearchParams() {
@@ -58,7 +62,7 @@ function usePathWithSearchParams() {
   );
 }
 
-const NavigationItem = ({ children, path, icon, intercomTarget }: NavigationItemProps) => {
+const NavigationItem = ({ children, path, icon, intercomTarget, disabled = false }: NavigationItemProps) => {
   const [hashPath, navigate] = useHashLocation();
   const isSelected = hashPath.startsWith(path);
   // Schema/marker errors don't block navigation: the visual pages render any config they can read.
@@ -85,13 +89,14 @@ const NavigationItem = ({ children, path, icon, intercomTarget }: NavigationItem
       icon={icon}
       onClick={handleNavigation}
       selected={isSelected}
+      state={disabled ? 'disabled' : undefined}
     >
       {children}
     </BitkitPageSidebar.Item>
   );
 };
 
-const Navigation = ({ hidePageNav = false, ...props }: Props) => {
+const Navigation = ({ hidePageNav = false, disablePageNav = false, ...props }: Props) => {
   const currentPage = useCurrentPage();
   const isDefaultTabRef = useRef(true);
   const { data } = useCiConfigSettings();
@@ -164,6 +169,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
         <Box minHeight={0} overflow="hidden" display="flex" flexDirection="column">
           <BitkitPageSidebar.Body minHeight={0} overflowY="auto">
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.workflows)}
               icon={IconWorkflow}
               intercomTarget="Workflows Page Navigation Item"
@@ -171,6 +177,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Workflows
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.pipelines)}
               icon={IconWorkflowFlow}
               intercomTarget="Pipelines Page Navigation Item"
@@ -178,6 +185,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Pipelines
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.stepBundles)}
               icon={IconStep}
               intercomTarget="Step Bundles Page Navigation Item"
@@ -185,6 +193,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Step bundles
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.secrets)}
               icon={IconLock}
               intercomTarget="Secrets Page Navigation Item"
@@ -192,6 +201,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Secrets
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.envVars)}
               icon={IconDollar}
               intercomTarget="Env Vars Page Navigation Item"
@@ -199,6 +209,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Env Vars
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.triggers)}
               icon={IconTrigger}
               intercomTarget="Triggers Page Navigation Item"
@@ -206,6 +217,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
               Triggers
             </NavigationItem>
             <NavigationItem
+              disabled={disablePageNav}
               path={withSearchParams(paths.containers)}
               icon={IconContainer}
               intercomTarget="Containers Page Navigation Item"
@@ -214,6 +226,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
             </NavigationItem>
             {RuntimeUtils.isWebsiteMode() && (
               <NavigationItem
+                disabled={disablePageNav}
                 path={withSearchParams(paths.stacksAndMachines)}
                 icon={IconStack}
                 intercomTarget="Stacks & Machines Page Navigation Item"
@@ -223,6 +236,7 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
             )}
             {RuntimeUtils.isWebsiteMode() && (
               <NavigationItem
+                disabled={disablePageNav}
                 path={withSearchParams(paths.licenses)}
                 icon={IconKey}
                 intercomTarget="Licenses Page Navigation Item"
