@@ -18,7 +18,7 @@ import {
   rem,
 } from '@bitrise/bitkit-v2';
 import { Box } from '@chakra-ui/react/box';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import FileTreeViewer from '@/components/FileTreeViewer/FileTreeViewer';
 import { segmentTrack } from '@/core/analytics/SegmentBaseTracking';
@@ -97,6 +97,22 @@ const NavigationItem = ({ children, path, icon, intercomTarget }: NavigationItem
 const Navigation = ({ hidePageNav = false, ...props }: Props) => {
   const currentPage = useCurrentPage();
   const isDefaultTabRef = useRef(true);
+  // Whether the page navigation may show its scrollbar. Off for the whole collapse / expand, so the
+  // scrollbar doesn't flash in and shrink with the panel: it goes the moment the nav starts to
+  // collapse, and comes back only once it has fully expanded again (transitionend below).
+  const [isNavScrollable, setIsNavScrollable] = useState(!hidePageNav);
+  if (hidePageNav && isNavScrollable) {
+    setIsNavScrollable(false);
+  }
+  // Fallback for when transitionend never fires (e.g. the page was in the background during the switch).
+  // Generous on purpose: rendering the visual page can hold the expand back by a few hundred ms.
+  useEffect(() => {
+    if (hidePageNav || isNavScrollable) {
+      return undefined;
+    }
+    const timeout = window.setTimeout(() => setIsNavScrollable(true), 1000);
+    return () => window.clearTimeout(timeout);
+  }, [hidePageNav, isNavScrollable]);
   const { data } = useCiConfigSettings();
   const withSearchParams = usePathWithSearchParams();
   const yamlSelector = currentPage === 'workflows' || currentPage === 'pipelines' ? currentPage : undefined;
@@ -162,10 +178,15 @@ const Navigation = ({ hidePageNav = false, ...props }: Props) => {
         // visibility interpolates, so the nav stays visible while it closes, then leaves the tab order.
         visibility={hidePageNav ? 'hidden' : 'visible'}
         transition="grid-template-rows 200ms ease-out, visibility 200ms"
+        onTransitionEnd={(event) => {
+          if (event.target === event.currentTarget && event.propertyName === 'grid-template-rows' && !hidePageNav) {
+            setIsNavScrollable(true);
+          }
+        }}
       >
         {/* The grid row can only close to 0 if its child clips: the Body's own padding would hold it open. */}
         <Box minHeight={0} overflow="hidden" display="flex" flexDirection="column">
-          <BitkitPageSidebar.Body minHeight={0} overflowY="auto">
+          <BitkitPageSidebar.Body minHeight={0} overflowY={isNavScrollable ? 'auto' : 'hidden'}>
             <NavigationItem
               path={withSearchParams(paths.workflows)}
               icon={IconWorkflow}
